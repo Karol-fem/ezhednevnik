@@ -1,3 +1,4 @@
+import { getBase } from 'vite-basepath/runtime';
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
@@ -29,7 +30,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(getBase()),
   routes
 })
 

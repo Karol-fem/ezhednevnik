@@ -1,10 +1,11 @@
+import viteBasepath from 'vite-basepath';
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
  
 // Конфигурация Vite для проекта «Ежедневник»
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [viteBasepath(), vue()],
   resolve: {
     alias: {
       // Алиас @ указывает на папку src для удобных импортов
