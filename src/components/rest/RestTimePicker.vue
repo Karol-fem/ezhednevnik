@@ -10,7 +10,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'select'])
 
 // Доступные варианты длительности отдыха (в минутах)
-const durations = [1, 5, 10]
+const durations = [1, 3, 5]
 
 function choose(minutes) {
   emit('update:modelValue', minutes)

@@ -10,7 +10,12 @@ import AppNav from '@/components/layout/AppNav.vue'
 
     <!-- Основной контент текущей вкладки -->
     <main class="max-w-6xl mx-auto px-4 pb-24 md:pb-8 pt-4">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <!-- Таймеры «Фокус» и «Отдых» продолжают работать при переключении вкладок -->
+        <KeepAlive include="FocusView,RestView">
+          <component :is="Component" />
+        </KeepAlive>
+      </router-view>
     </main>
 
     <!-- Навигация: снизу на телефоне, сверху на десктопе (см. AppNav.vue) -->

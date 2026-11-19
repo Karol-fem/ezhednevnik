@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import RestTypePicker from './RestTypePicker.vue'
 import RestTimePicker from './RestTimePicker.vue'
 import RestAnimation from './RestAnimation.vue'
+import { unlockAudio } from '@/composables/useBeep'
 
 const router = useRouter()
 
@@ -19,6 +20,8 @@ function handleTypeSelect(type) {
 }
 
 function handleDurationSelect(minutes) {
+  // Клик пользователя разблокирует звук для сигналов между упражнениями
+  unlockAudio()
   selectedDuration.value = minutes
   step.value = 3
 }
@@ -63,6 +66,16 @@ function goToTasks() {
       :duration="selectedDuration"
       @done="handleAnimationDone"
     />
+
+    <!-- Кнопка «Назад» во время упражнения -->
+    <button
+      v-if="step === 3"
+      type="button"
+      class="w-full text-sm text-text-light/60 dark:text-text-dark/60 hover:text-accent transition"
+      @click="handleAnimationDone"
+    >
+      ← Назад к выбору типа
+    </button>
 
     <!-- Кнопка возврата к задачам — доступна на любом шаге -->
     <button

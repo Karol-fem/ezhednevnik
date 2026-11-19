@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-vue": "^0.12.1",
     "pinia": "^2.3.1",
     "vue": "^3.4.21",
     "vue-router": "^4.6.4"

@@ -1,8 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch, nextTick} from 'vue'
+import { useRoute } from 'vue-router'
 import { useLocalStorage } from '@/composables/useLocalStorage'
 import TaskCard from './TaskCard.vue'
 import TaskForm from './TaskForm.vue'
+import DayNote from './DayNote.vue'
+import HabitsBlock from '@/components/habits/HabitsBlock.vue'
+
+const route = useRoute()
 
 // Все задачи хранятся одним массивом в localStorage
 const tasks = useLocalStorage('tasks', [])
@@ -10,7 +15,13 @@ const tasks = useLocalStorage('tasks', [])
 // Подписи дней недели (Пн–Вс)
 const dayLabels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
-// Находим понедельник текущей недели
+// Названия месяцев в родительном падеже — для диапазона дат («12–18 мая»)
+const monthNamesGenitive = [
+  'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
+]
+
+// Находим понедельник недели, содержащей переданную дату
 function getMonday(date) {
   const result = new Date(date)
   const day = result.getDay() // 0 = воскресенье, 1 = понедельник, ...
@@ -28,12 +39,14 @@ function toIsoDate(date) {
   return `${year}-${month}-${day}`
 }
 
-// Строим список из 7 дней текущей недели с их датами
+// Понедельник отображаемой сейчас недели (по умолчанию — текущая неделя)
+const currentWeekStart = ref(getMonday(new Date()))
+
+// Строим список из 7 дней отображаемой недели с их датами
 const weekDays = computed(() => {
-  const monday = getMonday(new Date())
   return dayLabels.map((label, index) => {
-    const date = new Date(monday)
-    date.setDate(monday.getDate() + index)
+    const date = new Date(currentWeekStart.value)
+    date.setDate(currentWeekStart.value.getDate() + index)
     return {
       label,
       date: toIsoDate(date),
@@ -41,6 +54,92 @@ const weekDays = computed(() => {
     }
   })
 })
+
+// Переключение недель
+function prevWeek() {
+  const date = new Date(currentWeekStart.value)
+  date.setDate(date.getDate() - 7)
+  currentWeekStart.value = date
+}
+
+function nextWeek() {
+  const date = new Date(currentWeekStart.value)
+  date.setDate(date.getDate() + 7)
+  currentWeekStart.value = date
+}
+
+function goToToday() {
+  currentWeekStart.value = getMonday(new Date())
+}
+
+// Является ли отображаемая неделя текущей (для отключения кнопки «Сегодня»)
+const isCurrentWeek = computed(() => {
+  return toIsoDate(currentWeekStart.value) === toIsoDate(getMonday(new Date()))
+})
+
+
+// Является ли день сегодняшним (сравниваем ISO-даты)
+function isToday(date) {
+  return date === toIsoDate(new Date())
+}
+
+// Ссылка на DOM-элемент карточки сегодняшнего дня
+const todayCardRef = ref(null)
+
+// Функция-ref для карточек: запоминаем элемент только у сегодняшней
+function setTodayCardRef(el, date) {
+  if (isToday(date)) {
+    todayCardRef.value = el
+  }
+}
+
+// На телефоне прокручиваем к сегодняшнему дню, если открыта текущая неделя
+async function scrollToToday() {
+  if (window.innerWidth >= 768 || !isCurrentWeek.value) {
+    return
+  }
+  // Ждём, пока Vue перерисует карточки новой недели
+  await nextTick()
+  if (todayCardRef.value) {
+    todayCardRef.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+}
+
+// Прокрутка срабатывает при каждом возврате на текущую неделю
+watch(currentWeekStart, scrollToToday)
+onMounted(scrollToToday)
+
+
+// Подпись диапазона дат недели, например «12–18 мая 2026»
+const weekRangeLabel = computed(() => {
+  const start = currentWeekStart.value
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+
+  const year = end.getFullYear()
+
+  if (start.getMonth() === end.getMonth()) {
+    return `${start.getDate()}–${end.getDate()} ${monthNamesGenitive[end.getMonth()]} ${year}`
+  }
+
+  return `${start.getDate()} ${monthNamesGenitive[start.getMonth()]} – ${end.getDate()} ${monthNamesGenitive[end.getMonth()]} ${year}`
+})
+
+
+// сразу показываем неделю, содержащую эту дату
+
+watch(
+  () => route.query.date,
+  (newDate) => {
+    if (newDate) {
+      const parsed = new Date(newDate)
+      if (!Number.isNaN(parsed.getTime())) {
+        currentWeekStart.value = getMonday(parsed)
+      }
+    }
+  },
+  { immediate: true }
+)
 
 // Состояние модального окна формы
 const showForm = ref(false)
@@ -115,16 +214,55 @@ function dayHasLongTask(date) {
 
 <template>
   <div>
+    <!-- Навигация по неделям -->
+    <div class="flex items-center justify-center gap-4 mb-4">
+      <button
+        type="button"
+        class="w-9 h-9 flex items-center justify-center rounded-button hover:bg-card-light dark:hover:bg-card-dark transition"
+        aria-label="Предыдущая неделя"
+        @click="prevWeek"
+      >
+        ←
+      </button>
+
+      <span class="text-sm md:text-base font-medium min-w-[14ch] text-center">
+        {{ weekRangeLabel }}
+      </span>
+
+      <button
+        type="button"
+        class="w-9 h-9 flex items-center justify-center rounded-button hover:bg-card-light dark:hover:bg-card-dark transition"
+        aria-label="Следующая неделя"
+        @click="nextWeek"
+      >
+        →
+      </button>
+
+      <button
+        v-if="!isCurrentWeek"
+        type="button"
+        class="ml-2 text-sm text-accent font-medium px-3 py-1.5 rounded-button border border-accent/40 hover:bg-accent/10 transition"
+        @click="goToToday"
+      >
+        Сегодня
+      </button>
+    </div>
+
     <!-- Сетка недели: 1 колонка на телефоне, 4 на планшете, 7 на десктопе -->
-    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <div
         v-for="day in weekDays"
         :key="day.date"
+        :ref="(el) => setTodayCardRef(el, day.date)"
         class="bg-card-light dark:bg-card-dark rounded-card p-3 shadow-sm flex flex-col gap-3"
+        :class="isToday(day.date) ? 'ring-2 ring-accent' : ''"
       >
         <!-- Заголовок дня -->
         <div class="flex items-baseline justify-between">
-          <h3 class="font-semibold text-sm">{{ day.label }}</h3>
+          <span class="flex items-center gap-1">
+            <h3 class="font-semibold text-sm">{{ day.label }}</h3>
+            <DayNote :date="day.date" />
+          </span>
           <span class="text-xs text-text-light/60 dark:text-text-dark/60">{{ day.shortDate }}</span>
         </div>
 
@@ -163,6 +301,9 @@ function dayHasLongTask(date) {
             Задач нет
           </p>
         </div>
+
+        <!-- Блок привычек (виден только если включены в настройках) -->
+        <HabitsBlock :date="day.date" />
 
         <!-- Кнопка добавления задачи -->
         <button

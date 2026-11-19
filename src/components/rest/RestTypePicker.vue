@@ -12,7 +12,7 @@ const emit = defineEmits(['update:modelValue', 'select'])
 // Доступные типы усталости
 const types = [
   { value: 'eyes', label: 'Глаза', icon: '👁️' },
-  { value: 'back', label: 'Спина', icon: '🧍' },
+  { value: 'spine', label: 'Спина', icon: '🧍' },
   { value: 'head', label: 'Голова', icon: '🧠' }
 ]
 

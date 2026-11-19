@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useLocalStorage } from '@/composables/useLocalStorage'
-
+const base = import.meta.env.BASE_URL
 const props = defineProps({
   // Управляется родителем (FocusTimer): играть звук сейчас или нет
   playing: {
@@ -11,11 +11,10 @@ const props = defineProps({
 })
 
 // Список доступных звуков. Файлы должны лежать в public/sounds/
-// (rain.mp3, cafe.mp3, forest.mp3). «Тишина» — без источника.
 const sounds = [
-  { value: 'rain', label: 'Дождь', icon: '🌧️', src: '/sounds/rain.mp3' },
-  { value: 'cafe', label: 'Кафе', icon: '☕', src: '/sounds/cafe.mp3' },
-  { value: 'forest', label: 'Лес', icon: '🌲', src: '/sounds/forest.mp3' },
+  { value: 'rain', label: 'Дождь', icon: '🌧️', src: `${base}sounds/rain.mp3` },
+  { value: 'cafe', label: 'Кафе', icon: '☕', src: `${base}sounds/cafe.mp3` },
+  { value: 'forest', label: 'Лес', icon: '🌲', src: `${base}sounds/forest.mp3` },
   { value: 'silence', label: 'Тишина', icon: '🔇', src: null }
 ]
 
@@ -23,7 +22,8 @@ const sounds = [
 const selectedSound = useLocalStorage('focusSound', 'silence')
 const volume = useLocalStorage('focusVolume', 50)
 
-const audioRef = ref(null)
+
+const audioRef = ref(new Audio())
 
 function findSound(value) {
   return sounds.find((s) => s.value === value) || sounds[sounds.length - 1]
@@ -137,7 +137,5 @@ onUnmounted(() => {
       <span class="text-xs w-8 text-right">{{ volume }}%</span>
     </div>
 
-    <!-- Скрытый аудио-элемент для проигрывания выбранного звука -->
-    <audio ref="audioRef"></audio>
   </div>
 </template>

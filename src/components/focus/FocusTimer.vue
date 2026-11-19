@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useLocalStorage } from '@/composables/useLocalStorage'
 import { useTimer } from '@/composables/useTimer'
+import { useBeep } from '@/composables/useBeep'
 import TimerCircle from './TimerCircle.vue'
 import SoundPicker from './SoundPicker.vue'
 
@@ -67,25 +68,9 @@ function selectTask(id) {
   customTaskName.value = ''
 }
 
-// Короткий звуковой сигнал через Web Audio API (без внешних файлов)
-function playBeep() {
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext
-    const ctx = new AudioCtx()
-    const oscillator = ctx.createOscillator()
-    const gain = ctx.createGain()
-    oscillator.type = 'sine'
-    oscillator.frequency.value = 880
-    gain.gain.setValueAtTime(0.15, ctx.currentTime)
-    oscillator.connect(gain)
-    gain.connect(ctx.destination)
-    oscillator.start()
-    oscillator.stop(ctx.currentTime + 0.4)
-    oscillator.onended = () => ctx.close()
-  } catch (error) {
-    // Web Audio может быть недоступен — тихо игнорируем
-  }
-}
+
+// Звуковой сигнал берём из общего composable
+const { playBeep } = useBeep()
 
 // При завершении рабочей фазы — звук и увеличение счётчика помодоро
 watch(
@@ -94,7 +79,7 @@ watch(
     if (!finished) {
       return
     }
-    playBeep()
+    playBeep(880, 0.4)
     if (mode.value === 'work') {
       pomodoroLog.value = {
         ...pomodoroLog.value,

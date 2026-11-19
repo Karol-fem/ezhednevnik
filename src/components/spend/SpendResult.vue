@@ -142,14 +142,14 @@ async function handleCopy() {
       </ul>
     </div>
 
-    <!-- Кнопка сохранения в заметки -->
+    <!-- Кнопка копирования -->
     <button
       type="button"
       class="w-full rounded-button border border-gray-300 dark:border-gray-600
              py-2 text-sm font-medium hover:bg-bg-light dark:hover:bg-bg-dark transition"
       @click="handleCopy"
     >
-      {{ copied ? 'Скопировано ✓' : 'Сохранить в заметки' }}
+      {{ copied ? 'Скопировано ✓' : 'Скопировать' }}
     </button>
   </div>
 </template>

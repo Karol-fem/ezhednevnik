@@ -2,14 +2,28 @@
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+import { computed } from 'vue'
+import { useNavTabs } from '@/composables/useNavTabs'
+const visibleNavTabs = useNavTabs()
 
 // Список вкладок навигации
 const navItems = [
   { path: '/tasks', label: 'Задачи', icon: '📝' },
   { path: '/focus', label: 'Фокус', icon: '🎯' },
   { path: '/rest', label: 'Отдых', icon: '🌿' },
-  { path: '/spend', label: 'Траты', icon: '💰' }
+  { path: '/spend', label: 'Траты', icon: '💰' },
+  { path: '/notes', label: 'Заметки', icon: '📝' },
+  { path: '/habits', label: 'Привычки', icon: '🔁' },
+  { path: '/settings', label: 'Настройки', icon: '⚙️' }
 ]
+
+// Показываем только выбранные в настройках вкладки + «Настройки» всегда видны
+const filteredNavItems = computed(() => {
+  return navItems.filter((item) => {
+    const key = item.path.slice(1)
+    return key === 'settings' || visibleNavTabs.value.includes(key)
+  })
+})
 
 function isActive(path) {
   return route.path === path
@@ -35,7 +49,7 @@ function isActive(path) {
              h-16 md:h-12 items-center"
     >
       <router-link
-        v-for="item in navItems"
+        v-for="item in filteredNavItems"
         :key="item.path"
         :to="item.path"
         class="flex md:inline-flex flex-col md:flex-row items-center md:gap-2

@@ -21,11 +21,25 @@ const routes = [
     path: '/rest',
     name: 'rest',
     component: () => import('@/views/RestView.vue')
-  },
-  {
+  },  {
     path: '/spend',
     name: 'spend',
     component: () => import('@/views/SpendView.vue')
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/SettingsView.vue')
+  },
+  {
+    path: '/notes',
+    name: 'notes',
+    component: () => import('@/views/NotesView.vue')
+  },
+  {
+    path: '/habits',
+    name: 'habits',
+    component: () => import('@/views/HabitsView.vue')
   }
 ]
 
