@@ -83,31 +83,47 @@ function isToday(date) {
   return date === toIsoDate(new Date())
 }
 
-// Ссылка на DOM-элемент карточки сегодняшнего дня
-const todayCardRef = ref(null)
+// Дата, выбранная в мини-календаре (приходит в адресе как ?date=YYYY-MM-DD)
+const selectedDate = computed(() => {
+  const value = route.query.date
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null
+})
 
-// Функция-ref для карточек: запоминаем элемент только у сегодняшней
-function setTodayCardRef(el, date) {
+// Классы подсветки карточки: сегодня — индиго, выбранная дата — голубая обводка
+function dayCardClass(date) {
   if (isToday(date)) {
-    todayCardRef.value = el
+    return 'ring-2 ring-accent'
   }
+  if (date === selectedDate.value) {
+    return 'ring-2 ring-sky-400 dark:ring-sky-500'
+  }
+  return ''
 }
 
-// На телефоне прокручиваем к сегодняшнему дню, если открыта текущая неделя
-async function scrollToToday() {
-  if (window.innerWidth >= 768 || !isCurrentWeek.value) {
+// На телефоне прокручиваем к выбранной дате, а если её нет — к сегодняшнему дню
+// (только когда сегодняшний день на открытой неделе)
+async function scrollToTarget() {
+  if (window.innerWidth >= 768) {
     return
   }
   // Ждём, пока Vue перерисует карточки новой недели
   await nextTick()
-  if (todayCardRef.value) {
-    todayCardRef.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+  let target = null
+  if (selectedDate.value) {
+    target = document.querySelector(`[data-date="${selectedDate.value}"]`)
+  }
+  if (!target && isCurrentWeek.value) {
+    target = document.querySelector(`[data-date="${toIsoDate(new Date())}"]`)
+  }
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
 
-// Прокрутка срабатывает при каждом возврате на текущую неделю
-watch(currentWeekStart, scrollToToday)
-onMounted(scrollToToday)
+// Прокрутка срабатывает при каждой смене недели (в том числе при выборе даты в мини-календаре)
+watch(currentWeekStart, scrollToTarget)
+onMounted(scrollToTarget)
 
 
 // Подпись диапазона дат недели, например «12–18 мая 2026»
@@ -253,9 +269,9 @@ function dayHasLongTask(date) {
       <div
         v-for="day in weekDays"
         :key="day.date"
-        :ref="(el) => setTodayCardRef(el, day.date)"
+        :data-date="day.date"
         class="bg-card-light dark:bg-card-dark rounded-card p-3 shadow-sm flex flex-col gap-3"
-        :class="isToday(day.date) ? 'ring-2 ring-accent' : ''"
+        :class="dayCardClass(day.date)"
       >
         <!-- Заголовок дня -->
         <div class="flex items-baseline justify-between">

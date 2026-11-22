@@ -4,6 +4,9 @@ import { useNavTabs } from '@/composables/useNavTabs'
 
 // Разделы, которые ведут на отдельные страницы
 const linkedSections = [
+  { key: 'tasks', label: 'Задачи', icon: '📅', path: '/tasks' },
+  { key: 'focus', label: 'Фокус', icon: '🎯', path: '/focus' },
+  { key: 'rest', label: 'Отдых', icon: '🌿', path: '/rest' },
   { key: 'spend', label: 'Траты', icon: '💰', path: '/spend' },
   { key: 'notes', label: 'Заметки', icon: '📝', path: '/notes' },
   { key: 'habits', label: 'Привычки', icon: '🔁', path: '/habits' }
@@ -48,22 +51,7 @@ function toggleTab(key) {
 
 <template>
   <div class="space-y-3 max-w-xl mx-auto">
-    <!-- Разделы со ссылками на отдельные страницы -->
-    <router-link
-      v-for="section in linkedSections"
-      :key="section.key"
-      :to="section.path"
-      class="flex items-center justify-between bg-card-light dark:bg-card-dark rounded-card
-             px-4 py-3 shadow-sm hover:opacity-80 transition"
-    >
-      <span class="flex items-center gap-3 text-sm font-medium">
-        <span class="text-xl" aria-hidden="true">{{ section.icon }}</span>
-        {{ section.label }}
-      </span>
-      <span class="text-text-light/40 dark:text-text-dark/40" aria-hidden="true">›</span>
-    </router-link>
-
-    <!-- Раздел «Иконки в меню» — разворачивается прямо здесь -->
+    <!-- Раздел «Иконки в меню» — первый в списке, разворачивается прямо здесь -->
     <div class="bg-card-light dark:bg-card-dark rounded-card shadow-sm overflow-hidden">
       <button
         type="button"
@@ -103,5 +91,20 @@ function toggleTab(key) {
         </button>
       </div>
     </div>
+
+    <!-- Разделы со ссылками на отдельные страницы -->
+    <router-link
+      v-for="section in linkedSections"
+      :key="section.key"
+      :to="section.path"
+      class="flex items-center justify-between bg-card-light dark:bg-card-dark rounded-card
+             px-4 py-3 shadow-sm hover:opacity-80 transition"
+    >
+      <span class="flex items-center gap-3 text-sm font-medium">
+        <span class="text-xl" aria-hidden="true">{{ section.icon }}</span>
+        {{ section.label }}
+      </span>
+      <span class="text-text-light/40 dark:text-text-dark/40" aria-hidden="true">›</span>
+    </router-link>
   </div>
 </template>
