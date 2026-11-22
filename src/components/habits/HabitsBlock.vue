@@ -11,7 +11,7 @@ const props = defineProps({
 })
 
 // Привычки и настройка видимости — общие с HabitsSettings.vue
-const habitsEnabled = useLocalStorage('habitsEnabled', false)
+const habitsEnabled = useLocalStorage('habitsEnabled', true)
 const habits = useLocalStorage('habits', [])
 
 // Отметки выполнения: { [habitId]: { 'YYYY-MM-DD': true } }
