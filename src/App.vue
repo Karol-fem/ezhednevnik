@@ -1,6 +1,7 @@
 <script setup>
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppNav from '@/components/layout/AppNav.vue'
+import AppFooter from '@/components/layout/AppFooter.vue';
 </script>
 
 <template>
@@ -18,7 +19,8 @@ import AppNav from '@/components/layout/AppNav.vue'
       </router-view>
     </main>
 
-    <!-- Навигация: снизу на телефоне, сверху на десктопе (см. AppNav.vue) -->
+    <!-- Навигация: снизу на телефоне, сверху на десктопе -->
     <AppNav />
+    <AppFooter />
   </div>
 </template>
