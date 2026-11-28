@@ -60,7 +60,7 @@ const comparisonItems = computed(() => {
   const yearly = yearlyTotal.value
   return [
     { icon: '🎧', label: 'Наушники', price: 15000, count: Math.floor(yearly / 15000) },
-    { icon: '📱', label: 'iPhone', price: 80000, count: Math.floor(yearly / 80000) },
+    { icon: '📱', label: 'Смартфон', price: 30000, count: Math.floor(yearly / 30000) },
     { icon: '🏖️', label: 'Путёвка на море', price: 50000, count: Math.floor(yearly / 50000) }
   ]
 })
